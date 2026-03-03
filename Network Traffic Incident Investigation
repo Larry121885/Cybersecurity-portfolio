@@ -2,7 +2,8 @@
 
 ## Scenario
 
-Users reported intermittent failures when attempting to access internal DNS services. A network traffic capture was performed to investigate potential causes.
+Users reported intermittent failures when attempting to access internal DNS services. 
+A network traffic capture was performed to investigate potential causes.
 
 ## Tools Used
 
@@ -18,7 +19,8 @@ Users reported intermittent failures when attempting to access internal DNS serv
 
 ## Findings
 
-Analysis showed DNS requests receiving ICMP unreachable responses, indicating possible service disruption or network filtering affecting DNS traffic.
+Analysis showed DNS requests receiving ICMP unreachable responses, indicating possible 
+service disruption or network filtering affecting DNS traffic.
 
 ## Potential Security Implications
 

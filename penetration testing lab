@@ -1,1 +1,28 @@
 
+# Controlled Penetration Testing Lab
+
+## Objective
+
+Conduct reconnaissance and vulnerability identification against a lab system to understand potential attack paths.
+
+## Tools Used
+
+- Nmap
+- Linux command line
+
+## Investigation Steps
+
+1. Performed network reconnaissance
+2. Enumerated open ports and services
+3. Identified vulnerable services
+4. Evaluated potential exploitation paths
+
+## Findings
+
+Multiple services were exposed that could potentially allow attackers to gain unauthorized access.
+
+## Recommendations
+
+- Restrict exposed services
+- Implement firewall rules
+- Patch vulnerable software

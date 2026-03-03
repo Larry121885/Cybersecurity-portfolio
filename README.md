@@ -13,7 +13,8 @@ This repository contains cybersecurity investigation projects demonstrating hand
 • Incident investigation  
 • Penetration testing  
 
-These projects simulate real-world security analyst tasks including identifying vulnerabilities, analyzing suspicious network activity, and documenting incident response findings.
+These projects simulate real-world security analyst tasks including identifying vulnerabilities,
+analyzing suspicious network activity, and documenting incident response findings.
 
 ---
 

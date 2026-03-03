@@ -1,5 +1,11 @@
 # Cybersecurity Portfolio — Larry Dolly
 
+Cybersecurity professional with CompTIA CySA+ and Security+ certifications
+and hands-on experience in network traffic analysis, vulnerability assessment,
+and incident investigation.
+
+This portfolio demonstrates practical SOC analyst skills including
+log analysis, vulnerability scanning, and threat investigation.
 This repository contains cybersecurity investigation projects demonstrating hands-on experience in:
 
 • Network traffic analysis  
@@ -13,8 +19,10 @@ These projects simulate real-world security analyst tasks including identifying 
 
 ## Certifications
 
-CompTIA CySA+  
-CompTIA Security+  
+## Certifications
+
+CompTIA CySA+ (2026)
+CompTIA Security+ (2025) 
 
 ---
 

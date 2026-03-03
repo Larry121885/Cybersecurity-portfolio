@@ -1,0 +1,33 @@
+# Network Traffic Incident Investigation
+
+## Scenario
+
+Users reported intermittent failures when attempting to access internal DNS services. A network traffic capture was performed to investigate potential causes.
+
+## Tools Used
+
+- tcpdump
+- Linux command line tools
+
+## Investigation Process
+
+1. Captured network traffic using tcpdump
+2. Analyzed DNS request and response patterns
+3. Identified repeated ICMP unreachable responses
+4. Evaluated abnormal traffic patterns affecting DNS availability
+
+## Findings
+
+Analysis showed DNS requests receiving ICMP unreachable responses, indicating possible service disruption or network filtering affecting DNS traffic.
+
+## Potential Security Implications
+
+- Possible denial-of-service activity
+- Network misconfiguration
+- Firewall blocking DNS traffic
+
+## Recommendations
+
+- Monitor DNS traffic for abnormal patterns
+- Review firewall configurations
+- Implement DNS traffic monitoring alerts

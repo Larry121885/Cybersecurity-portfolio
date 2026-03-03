@@ -1,1 +1,41 @@
 
+# Insider Threat Investigation
+
+## Scenario
+
+Network scan data indicated suspicious activity originating from an internal system. 
+The investigation focused on determining whether the activity represented potential 
+insider threat behavior or unauthorized internal reconnaissance.
+
+## Tools Used
+
+- Network scanning tools
+- Log analysis
+- Linux command line utilities
+
+## Investigation Steps
+
+1. Reviewed network scan results to identify unusual internal activity.
+2. Analyzed system logs for abnormal login behavior.
+3. Evaluated network communication patterns between internal systems.
+4. Correlated timestamps between scan activity and system access logs.
+
+## Findings
+
+The investigation revealed internal network scanning activity that could indicate reconnaissance 
+behavior originating from an internal system.
+
+## Security Impact
+
+Internal reconnaissance activity can indicate:
+
+- Unauthorized internal access
+- Insider threat activity
+- Compromised internal system performing lateral movement
+
+## Recommendations
+
+- Monitor internal network scanning activity
+- Implement alerting for unusual internal reconnaissance behavior
+- Restrict internal network access where possible
+- Conduct additional monitoring of affected systems

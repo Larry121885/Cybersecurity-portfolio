@@ -1,1 +1,108 @@
 
+# Configuring Security Controls (Preventive, Detective, Directive, Corrective)
+
+## Scenario
+In a Windows Server 2019 lab environment, I validated how different security control types reduce risk and support vulnerability response. The objective was to identify a weakness, implement the appropriate control, and verify the control’s effectiveness through testing and logs.
+
+## Environment
+- Windows Server 2019 (PC10 client)
+- Domain environment with administrative server resources (SMB share)
+- Local Security Policy and Event Viewer
+
+## Tools Used
+- Windows Share Permissions (SMB ACLs)
+- Local Security Policy (Audit Policy)
+- Event Viewer (Security log)
+- PowerShell (Registry edits, hashing, scripts)
+- Sysinternals NotMyFault64 (fault injection)
+
+---
+
+## Preventive Control: Restricting Admin-Only SMB Share Access
+### Problem Identified
+A non-administrative user was able to access an administrative SMB share (CertEnroll), creating unnecessary exposure of sensitive admin files.
+
+### Action Taken
+- Removed the **Everyone** group from the SMB share permissions on `\\10.1.16.1\CertEnroll`
+- Relied on default implicit deny rather than using explicit deny rules (to avoid unintended access issues)
+
+### Validation
+- Retested access as a non-admin user and confirmed the share returned **Access Denied / Network Error**
+
+**Outcome:** Non-admin access was blocked, reducing exposure of sensitive administrative resources.
+
+---
+
+## Detective Control: Auditing Object Access (Folder Deletion)
+### Problem Identified
+File/folder deletion was not being logged, limiting visibility into destructive behavior.
+
+### Action Taken
+- Enabled **Audit object access** (Success + Failure) in Local Security Policy
+- Configured auditing on `C:\LABFILES` for the **Everyone** principal:
+  - Audited **Delete** and **Delete subfolders and files**
+  - Enabled inheritance to child objects
+
+### Validation
+- Deleted `C:\LABFILES\pcaps`
+- Confirmed relevant Security events:
+  - **4660** (Object deleted)
+  - **4663** (Object access attempt/details including Object Name)
+
+**Outcome:** Deletions were successfully logged, improving accountability and incident investigation capability.
+
+---
+
+## Directive Control: Legal Notice / Authorized Use Banner
+### Purpose
+Directive controls influence user behavior and improve compliance by clearly communicating acceptable use expectations.
+
+### Action Taken
+- Used PowerShell to set:
+  - `HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\legalnoticecaption`
+  - `HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\legalnoticetext`
+
+### Validation
+- Signed out and confirmed the **login warning banner** appeared before authentication.
+
+**Outcome:** The system provided a compliance and acceptable-use notice prior to login.
+
+---
+
+## Corrective Control: System Recovery + File Integrity Restoration
+### Part A: OS Corrective Control (Stability Protection)
+- Used **Sysinternals NotMyFault64** to trigger a fault (simulated misbehaving application)
+- Observed a controlled stop error and reboot, confirming Windows corrective behavior that protects system stability.
+
+### Part B: Custom Corrective Control (File Integrity Monitoring + Auto-Restore)
+#### Objective
+Detect unauthorized or undesired changes to a file and restore it to a known-good state.
+
+#### Action Taken
+1. Created `notes.txt` with approved content
+2. Generated and stored a known-good SHA-256 hash in `hash.txt`
+3. Wrote scripts:
+   - `calchash.ps1` to calculate baseline hash
+   - `check.ps1` to compare current hash vs baseline and automatically restore content if changed
+
+#### Validation
+- Modified `notes.txt` (appended content)
+- Executed `check.ps1` and confirmed:
+  - Change was detected via hash mismatch
+  - File was restored back to approved content
+
+**Outcome:** Hashing was used to detect file changes and a script-based corrective action restored integrity automatically.
+
+---
+
+## Key Takeaways
+- **Preventive controls** reduce exposure by blocking unauthorized actions (least privilege on shares).
+- **Detective controls** improve visibility through auditing and event logs (e.g., 4660/4663).
+- **Directive controls** drive compliance and communicate acceptable-use expectations.
+- **Corrective controls** help restore systems/data to a known-good state (reboot protections, integrity restoration via hashing).
+
+## Skills Demonstrated
+- Access control hardening (SMB permissions, least privilege)
+- Audit policy configuration and Windows event interpretation
+- Security documentation and validation testing
+- PowerShell scripting and integrity verification using SHA-256 hashes

@@ -1,7 +1,8 @@
 # 🔍 Threat Hunting & IoC Investigation
 
 ## 📄 Overview
-In this project, I performed threat hunting across a simulated enterprise environment to identify Indicators of Compromise (IoCs), investigate suspicious activity, validate legitimate behavior, and determine the source of potential threats.
+In this project, I performed threat hunting across a simulated enterprise environment to identify Indicators of Compromise (IoCs), 
+investigate suspicious activity, validate legitimate behavior, and determine the source of potential threats.
 
 This investigation followed a SOC-style workflow:
 - Analyze logs and network activity
@@ -66,7 +67,8 @@ nmap 172.16.0.201 -p 1-100 -r -T2
 ---
 
 ### 2. Abnormal HTTPS Traffic Investigation
-Threat intelligence indicated that secure websites were being targeted in a resource exhaustion attack and that the offending process would not present as a standard web client. I investigated repeated secure web connections affecting the DC10 web service.
+Threat intelligence indicated that secure websites were being targeted in a resource exhaustion attack and that the offending
+process would not present as a standard web client. I investigated repeated secure web connections affecting the DC10 web service.
 
 #### DC10 Analysis
 I reviewed current TCP connections on DC10 to identify the system involved and the process ID associated with the suspicious HTTPS sessions.

@@ -26,3 +26,5 @@ Multiple services were exposed that could potentially allow attackers to gain un
 - Restrict exposed services
 - Implement firewall rules
 - Patch vulnerable software
+The link below is a video of me walking the viewer through the process. 
+https://youtu.be/CVrxyFx7jk4

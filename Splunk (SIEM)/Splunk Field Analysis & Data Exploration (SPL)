@@ -1,0 +1,150 @@
+# 🔍 Splunk Field Analysis & Data Exploration (SPL)
+
+## 📄 Overview
+In this project, I used Splunk to explore and analyze log data using field-based searches. The focus of this lab was learning how to filter, extract, 
+and manipulate fields to better understand log data and improve query efficiency.
+
+This project reflects foundational SIEM skills used in Security Operations Centers (SOC), including data filtering, 
+field selection, and query refinement.
+
+---
+
+## 🖥️ Environment
+
+- Splunk Search & Reporting App  
+- Buttercup Games dataset (web, security, network logs)  
+- Simulated enterprise log environment  
+
+---
+
+## 🛠️ Tools & Technologies
+
+- Splunk SPL  
+- Field extraction (erex, rex)  
+- Log filtering (fields, where)  
+- Aggregation (stats)  
+- Data formatting  
+
+---
+
+## 🔍 Lab Breakdown
+
+### 1. Filtering Events with Fields
+
+Used SPL to filter specific events:
+
+```spl
+index=web sourcetype=access_combined action=purchase
+```
+
+**What I Did:**
+- Filtered events based on specific field values  
+- Focused on relevant log entries  
+
+**What I Learned:**
+- Fields allow precise filtering of large datasets  
+- Reduces noise and improves search efficiency  
+
+---
+
+### 2. Working with Fields
+
+**What I Did:**
+- Explored fields such as:
+  - product_name  
+  - sale_price  
+  - categoryId  
+
+**What I Learned:**
+- Fields provide structured insight into raw log data  
+- Enable faster understanding of event context  
+
+---
+
+### 3. Selecting and Removing Fields
+
+```spl
+| fields user, src_ip, app
+| fields - host
+```
+
+**What I Did:**
+- Selected relevant fields  
+- Removed unnecessary fields  
+
+**What I Learned:**
+- Field selection improves readability and focus  
+- Helps analysts isolate important data quickly  
+
+---
+
+### 4. Filtering and Sorting Data
+
+```spl
+| where count > 30
+| sort -src_ip
+```
+
+**What I Did:**
+- Applied filters to narrow results  
+- Sorted data to highlight key patterns  
+
+**What I Learned:**
+- Filtering helps prioritize high-value data  
+- Sorting reveals trends and anomalies  
+
+---
+
+### 5. Aggregating Data
+
+```spl
+| stats count by src_ip
+```
+
+**What I Did:**
+- Grouped events by source IP  
+
+**What I Learned:**
+- Aggregation simplifies large datasets  
+- Helps identify patterns in activity  
+
+---
+
+### 6. Field Extraction
+
+```spl
+| rex field=_raw "port (?<port>\d+)"
+| stats count by port
+```
+
+**What I Did:**
+- Used `erex` and `rex` to extract data from raw logs  
+
+**What I Learned:**
+- Regex improves field extraction accuracy  
+- Enables deeper analysis of unstructured data  
+
+---
+
+## 🧠 Key Takeaways
+
+- Field-based analysis is essential for working with SIEM tools  
+- SPL enables efficient filtering and data manipulation  
+- Selecting the right fields improves investigation speed  
+- Aggregation and extraction help reveal useful patterns  
+
+---
+
+## ✅ Skills Demonstrated
+
+- Splunk SPL fundamentals  
+- Field-based log analysis  
+- Data filtering and refinement  
+- Query development  
+- Log data interpretation  
+
+---
+
+## 📎 Supporting Documentation
+
+- Upload as: splunk_lab.pdf

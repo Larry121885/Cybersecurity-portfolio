@@ -1,0 +1,242 @@
+# 🔍 Threat Hunting & IoC Investigation
+
+## 📄 Overview
+In this project, I performed threat hunting across a simulated enterprise environment to identify Indicators of Compromise (IoCs), investigate suspicious activity, validate legitimate behavior, and determine the source of potential threats.
+
+This investigation followed a SOC-style workflow:
+- Analyze logs and network activity
+- Validate suspicious behavior
+- Eliminate false positives
+- Identify and confirm malicious activity
+- Recommend remediation actions
+
+---
+
+## 🖥️ Environment
+- DC10 – Windows Server 2019 (Domain Controller / Web Server)
+- MS10 – Windows Server 2016
+- PC10 – Windows Server 2019 (Client System)
+- LAMP – Ubuntu Linux Server
+- Kali – Penetration Testing System
+
+---
+
+## 🛠️ Tools & Technologies
+- `iptables`
+- `tail`
+- `grep`
+- `netstat`
+- `tasklist`
+- PowerShell
+- Event Viewer
+- `nmap`
+- `netcat`
+
+---
+
+## 🔍 Investigation Breakdown
+
+### 1. Network Log Analysis: Port Scanning Detection
+To begin the investigation, I enabled network logging on the LAMP server and monitored inbound traffic for suspicious behavior.
+
+~~~bash
+sudo su
+iptables -A INPUT -j LOG
+iptables -S > /home/lamp/filter-list.txt
+tail -f /var/log/kern.log
+grep <Kali_IP> /var/log/kern.log
+~~~
+
+### Analysis
+- Observed repeated inbound connections from a single source IP
+- Destination ports increased sequentially
+- Traffic pattern indicated systematic probing of multiple ports
+
+### Finding
+The activity was consistent with **port scanning / reconnaissance activity**.
+
+### Validation
+I reviewed the script run from Kali and confirmed it used `nmap` to scan ports 1 through 100.
+
+~~~bash
+cat lab04demo1.sh
+nmap 172.16.0.201 -p 1-100 -r -T2
+~~~
+
+---
+
+### 2. Abnormal HTTPS Traffic Investigation
+Threat intelligence indicated that secure websites were being targeted in a resource exhaustion attack and that the offending process would not present as a standard web client. I investigated repeated secure web connections affecting the DC10 web service.
+
+#### DC10 Analysis
+I reviewed current TCP connections on DC10 to identify the system involved and the process ID associated with the suspicious HTTPS sessions.
+
+~~~cmd
+netstat -nop tcp
+tasklist /FI "PID eq <DC10_HTTPS_PID>"
+~~~
+
+### Analysis
+- Identified multiple active secure web sessions
+- Repeated connections were consuming system resources
+- Activity aligned with the IoC describing abuse of a secure website
+
+---
+
+#### MS10 Analysis: False Positive Elimination
+Because MS10 showed a secure web session to DC10, I investigated it further to determine whether it was legitimate or malicious.
+
+~~~cmd
+netstat -nop tcp
+tasklist /FI "PID eq <MS10_HTTPS_PID>"
+~~~
+
+~~~powershell
+Get-WmiObject win32_process -filter "processid=<MS10_HTTPS_PID>" > outfile.txt
+Select-String -Path .\outfile.txt -Pattern "CommandLine"
+Get-ScheduledTask -TaskPath "\" | Where-Object {$_.State -eq "Running" -and $_.Principal.UserID -eq "SYSTEM"}
+~~~
+
+### Analysis
+- Identified a PowerShell process associated with the HTTPS traffic
+- Verified the script path through process command-line details
+- Confirmed the activity was tied to a legitimate scheduled system-management task
+
+### Finding
+MS10 was a **false positive** and was ruled out as the malicious source.
+
+---
+
+#### Kali Analysis: Malicious Source
+After eliminating MS10, I investigated Kali to determine whether it was the source of the abusive HTTPS traffic.
+
+~~~bash
+netstat -np --protocol=inet
+ps -p <Kali_HTTPS_PID>
+cat /root/lab04demo4.sh
+~~~
+
+### Analysis
+- Observed multiple repeated HTTPS sessions from Kali to DC10
+- Secure web sessions continued to appear with changing PIDs
+- Process did not behave like a standard web client
+- Script used `netcat` in an infinite loop to repeatedly connect to the secure web service
+- Script also modified `/etc/hosts` to avoid DNS lookups that might reveal additional evidence
+
+### Finding
+The behavior was consistent with a **resource exhaustion attack** targeting the DC10 secure website.
+
+---
+
+### 3. Threat Hunting Challenges
+
+#### Suspicious FTP Activity
+I reviewed a packet capture excerpt to identify the most concerning issue.
+
+### Analysis
+- Anonymous FTP access was observed
+- External system established an FTP session and was granted anonymous access
+
+### Finding
+This indicated a **misconfigured FTP service** and a potential avenue for unauthorized access.
+
+---
+
+#### Data Exfiltration Indicator
+I reviewed a firewall log around the time of a suspected data exfiltration incident.
+
+### Suspicious Host
+- **10.1.24.101**
+
+### Analysis
+- Large amount of traffic was sent over DNS port 53
+- DNS is typically used for small query/response traffic, not high-volume transfers
+
+### Finding
+This activity was suspicious for **DNS tunneling / potential data exfiltration**.
+
+---
+
+#### Command and Control Detection
+I reviewed a process report for signs of botnet or command-and-control activity.
+
+### Suspicious Process
+- `nc.exe`
+
+### User Context
+- `jaime`
+
+### Analysis
+- `nc.exe` is commonly associated with netcat
+- Netcat can be used to create backdoors, listener services, or remote command channels
+
+### Finding
+This was a likely indicator of **command-and-control (C2) activity**.
+
+---
+
+### 4. DNS Log Analysis: Beaconing Detection
+To investigate suspicious outbound activity, I enabled DNS Client logging on PC10 and analyzed DNS query events in Event Viewer.
+
+### Logging Steps
+- Opened **Event Viewer**
+- Navigated to **Applications and Services Logs > Microsoft > Windows > DNS Client Events > Operational**
+- Enabled logging on the Operational log
+- Ran the provided PowerShell script to generate DNS traffic
+- Refreshed the log and filtered for **Event ID 3010**
+
+~~~powershell
+.\lab04demo2.ps1
+~~~
+
+### Analysis
+- Observed repeated DNS queries to a suspicious external domain
+- Repeated requests occurred at regular intervals
+- Focused on **type 1** queries to measure the timing pattern
+- Repeated lookups occurred every **5 seconds**
+- Regular repeated DNS resolution attempts by unknown software indicate **beaconing**
+
+### Finding
+The DNS activity was consistent with **malware beaconing / command-and-control check-in behavior**.
+
+---
+
+## 🚨 Key Findings
+- Port scanning detected from Kali against the LAMP server
+- Resource exhaustion attack identified against the DC10 secure website
+- Legitimate MS10 system-management traffic correctly identified as a false positive
+- Anonymous FTP access identified as a security concern
+- High-volume DNS traffic suggested possible exfiltration activity
+- `nc.exe` under the `jaime` account indicated likely command-and-control behavior
+- Repeated DNS queries at fixed intervals indicated beaconing behavior
+
+---
+
+## 🛡️ Recommendations
+- Enable and centralize network and DNS logging
+- Alert on sequential port scans and repeated connection attempts
+- Investigate repeated HTTPS sessions from non-standard client processes
+- Restrict unauthorized outbound connections
+- Monitor DNS traffic for high-volume transfers and repeated query intervals
+- Disable anonymous FTP access unless explicitly required
+- Investigate unauthorized use of tools such as `netcat`
+- Validate alerts carefully to eliminate false positives before remediation
+
+---
+
+## 🧠 Skills Demonstrated
+- Threat hunting
+- IoC analysis
+- Network traffic analysis
+- Process investigation
+- DNS analysis
+- False positive validation
+- Incident investigation
+- Log correlation
+- Security monitoring
+
+---
+
+## 📌 Summary
+This project demonstrates the ability to investigate security alerts using multiple data sources, correlate logs and system activity,
+distinguish between legitimate and malicious behavior, and identify validated Indicators of Compromise in a multi-system environment.
